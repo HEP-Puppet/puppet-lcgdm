@@ -4,7 +4,8 @@ class lcgdm::base::config (
   $gid     = $lcgdm::base::params::gid,
   $cert    = $lcgdm::base::params::cert,
   $certkey = $lcgdm::base::params::certkey,
-  $egiCA   = $lcgdm::base::params::egiCA) inherits lcgdm::base::params {
+  $egiCA   = $lcgdm::base::params::egiCA,
+) inherits lcgdm::base::params {
   include('fetchcrl')
 
   group { $user:
@@ -25,13 +26,19 @@ class lcgdm::base::config (
   if !defined_with_params(File['/etc/grid-security'], '') {
     file { '/etc/grid-security':
       ensure  => directory,
-      owner   => root,
-      group   => root,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0755',
       seluser => 'system_u',
       selrole => 'object_r',
       seltype => 'etc_t',
     }
+  }
+  if versioncmp($::puppetversion, '4.0.0') < 0 {
+    $lens_sel_type  = 'puppet_var_lib_t'
+  }
+  else {
+    $lens_sel_type  = 'lib_t'
   }
   file {
     "/etc/grid-security/${user}":
@@ -64,25 +71,25 @@ class lcgdm::base::config (
       source  => '/etc/grid-security/hostkey.pem',
       require => User[$user];
 
-    '/usr/share/augeas/lenses/dist/shift.aug':
+    [ "${facts['puppet_vardir']}/lib", "${facts['puppet_vardir']}/lib/augeas/", "${facts['puppet_vardir']}/lib/augeas/lenses/" ]:
+      ensure => directory;
+
+    "${facts['puppet_vardir']}/lib/augeas/lenses/shift.aug":
       ensure  => present,
-      owner   => root,
-      group   => root,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0744',
       seluser => 'system_u',
       selrole => 'object_r',
-      seltype => 'etc_t',
+      seltype => $lens_sel_type,
       content => template('lcgdm/shift.aug');
   }
 
-  augeas { "unlimit_${user}_nproc":
-    context => '/files/etc/security/limits.d/90-nproc.conf',
-    changes => [
-      "set domain[. = '${user}'] ${user}",
-      "set domain[. = '${user}']/type soft",
-      "set domain[. = '${user}']/item nproc",
-      "set domain[. = '${user}']/value unlimited"]
+  lcgdm::limits {
+    '*-soft': domain => '*', type => 'soft', item => 'nofile', value =>  65000;
+    '*-hard': domain => '*', type => 'hard', item => 'nofile', value =>  65000;
+    '*-soft-nproc': domain => '*', type => 'soft', item => 'nproc', value =>  65000;
+    '*-hard-proc': domain => '*', type => 'hard', item => 'nproc', value =>  65000;
   }
 
 }
-

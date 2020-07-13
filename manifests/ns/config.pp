@@ -5,6 +5,7 @@ class lcgdm::ns::config (
   $dbuser,
   $dbpass,
   $dbhost          = $lcgdm::ns::params::dbhost,
+  $ns_db           = $lcgdm::ns::params::ns_db,
   $dbmanage        = $lcgdm::ns::params::dbmanage,
   $active          = $lcgdm::ns::params::active,
   $readonly        = $lcgdm::ns::params::readonly,
@@ -13,8 +14,9 @@ class lcgdm::ns::config (
   $coredump        = $lcgdm::ns::params::coredump,
   $numthreads      = $lcgdm::ns::params::numthreads,
   $configfile      = $lcgdm::ns::params::configfile,
-  $logpermissions  = $lcgdm::ns::params::logpermissions,) inherits lcgdm::ns::params {
-  Class[Lcgdm::Base::Config] -> Class[Lcgdm::Ns::Config]
+  $logpermissions  = $lcgdm::ns::params::logpermissions,
+) inherits lcgdm::ns::params {
+  Class[lcgdm::base::config] -> Class[lcgdm::ns::config]
 
   case $flavor {
     cns  : {
@@ -44,11 +46,11 @@ class lcgdm::ns::config (
       $basepath = 'dpm'
       $pkg = "dpm-name-server-${dbflavor}"
       $clientpkg = 'dpm'
-    } 
+    }
   }
 
   file {
-    "${configfile}":
+    $configfile:
       ensure  => present,
       owner   => $lcgdm::base::config::user,
       group   => $lcgdm::base::config::user,
@@ -57,8 +59,8 @@ class lcgdm::ns::config (
       require => User[$lcgdm::base::config::user];
 
     "/etc/sysconfig/${daemon}":
-      owner   => root,
-      group   => root,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0644',
       content => template('lcgdm/ns/sysconfig.erb');
   }

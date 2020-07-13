@@ -1,8 +1,9 @@
 class lcgdm::dpm::params () inherits lcgdm::base::params {
-  $host = "${::fqdn}"
-  $nshost = "${::fqdn}"
+  $host = $::fqdn
+  $nshost = $::fqdn
   $dbflavor = 'mysql'
   $dbhost = 'localhost'
+  $dpm_db = 'dpm_db'
   $dbmanage = true
   $active = 'yes'
   $ulimitn = 4096
@@ -12,5 +13,4 @@ class lcgdm::dpm::params () inherits lcgdm::base::params {
   $syncget = 'yes'
   $configfile = '/usr/etc/DPMCONFIG'
   $reqcleantimeout = '3m'
-
 }

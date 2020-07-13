@@ -1,8 +1,9 @@
 class lcgdm::ns::params () inherits lcgdm::base::params {
   $flavor = 'dpns'
-  $host = "${::fqdn}"
+  $host = $::fqdn
   $dbflavor = 'mysql'
   $dbhost = 'localhost'
+  $ns_db = 'cns_db'
   $dbmanage = true
   $active = 'yes'
   $readonly = 'no'

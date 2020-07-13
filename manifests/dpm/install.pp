@@ -1,5 +1,5 @@
 class lcgdm::dpm::install () inherits lcgdm::dpm::params {
-  Class[Lcgdm::Dpm::Config] -> Class[Lcgdm::Dpm::Install]
+  Class[lcgdm::dpm::config] -> Class[lcgdm::dpm::install]
 
   package { "dpm-server-${lcgdm::dpm::config::dbflavor}": ensure => present; }
 
@@ -18,12 +18,11 @@ class lcgdm::dpm::install () inherits lcgdm::dpm::params {
       require => File['/var/log/dpm'];
   }
 
-  validate_bool($lcgdm::dpm::config::dbmanage)
-
   if $lcgdm::dpm::config::dbmanage and $lcgdm::dpm::config::dbflavor == 'mysql' {
-    Class[Lcgdm::Dpm::Mysql] -> Class[Lcgdm::Dpm::Service]
+    Class[lcgdm::dpm::mysql] -> Class[lcgdm::dpm::service]
 
     class { 'lcgdm::dpm::mysql':
+      dbname  => $lcgdm::dpm::config::dpm_db,
       dbuser  => $lcgdm::dpm::config::dbuser,
       dbpass  => $lcgdm::dpm::config::dbpass,
       dbhost  => $lcgdm::dpm::config::dbhost,

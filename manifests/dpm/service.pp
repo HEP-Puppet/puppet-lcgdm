@@ -1,5 +1,6 @@
 class lcgdm::dpm::service () inherits lcgdm::dpm::params {
-  Class[Lcgdm::Dpm::Install] -> Class[Lcgdm::Dpm::Service]
+  Class[lcgdm::dpm::install] -> Class[lcgdm::dpm::service]
+  Class[lcgdm::base::config] -> Class[lcgdm::dpm::service]
 
   service { 'dpm':
     ensure     => running,
@@ -7,19 +8,21 @@ class lcgdm::dpm::service () inherits lcgdm::dpm::params {
     hasrestart => true,
     hasstatus  => true,
     name       => 'dpm',
-    subscribe  => File["${configfile}"],
+    subscribe  => File[$configfile,
+        "/etc/grid-security/${lcgdm::base::config::user}/${lcgdm::base::config::cert}",
+        "/etc/grid-security/${lcgdm::base::config::user}/${lcgdm::base::config::certkey}"],
   }
 
-   #centOS7 changes
- if $::operatingsystemmajrelease and ($::operatingsystemmajrelease + 0) >= 7 {
+  #centOS7 changes
+  if versioncmp($facts['os']['release']['major'], '7') >= 0 {
 
-   file{'/etc/systemd/system/multi-user.target.wants/dpm.service':
-     ensure => 'link',
-     target => '/usr/share/dpm-mysql/dpm.service',
-   }
-   file{'/etc/systemd/system/dpm.service':
-     ensure => link,
-     target => '/usr/share/dpm-mysql/dpm.service',
-   }
- }
+    file{'/etc/systemd/system/multi-user.target.wants/dpm.service':
+      ensure => link,
+      target => '/usr/share/dpm-mysql/dpm.service',
+    } ->
+    file{'/etc/systemd/system/dpm.service':
+      ensure => link,
+      target => '/usr/share/dpm-mysql/dpm.service',
+    } -> Service['dpm']
+  }
 }

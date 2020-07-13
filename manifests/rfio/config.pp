@@ -5,14 +5,19 @@ class lcgdm::rfio::config (
   $portrange    = $lcgdm::rfio::params::portrange,
   $startoptions = $lcgdm::rfio::params::startoptions,
   $nshost       = $lcgdm::rfio::params::nshost,
-  $dpmhost      = $lcgdm::rfio::params::dpmhost) inherits lcgdm::rfio::params {
+  $dpmhost      = $lcgdm::rfio::params::dpmhost,
+) inherits lcgdm::rfio::params {
   include('lcgdm::shift::config')
 
-  Class[Lcgdm::Base::Config] -> Class[Lcgdm::Rfio::Config]
+  Class[lcgdm::base::config] -> Class[lcgdm::rfio::config]
+
+  $lcgdm_user = $lcgdm::base::config::user
+  $lcgdm_cert = $lcgdm::base::config::cert
+  $lcgdm_certkey = $lcgdm::base::config::certkey
 
   file { '/etc/sysconfig/rfiod':
-    owner   => root,
-    group   => root,
+    owner   => 'root',
+    group   => 'root',
     mode    => '0644',
     content => template('lcgdm/rfio/sysconfig.erb');
   }

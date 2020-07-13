@@ -1,9 +1,14 @@
-class lcgdm::rfio ($dpmhost = "${::fqdn}", $nshost = "${dpmhost}",) {
-  Class[Lcgdm::Base::Config] -> Class[Lcgdm::Rfio::Config]
+class lcgdm::rfio ($dpmhost = $::fqdn, $nshost = undef,) {
+  Class[lcgdm::base::config] -> Class[lcgdm::rfio::config]
+
+  $_nshost = $nshost ? {
+    undef  => $dpmhost,
+    default  => $nshost,
+  }
 
   class { 'lcgdm::rfio::config':
-    dpmhost => "${dpmhost}",
-    nshost  => "${nshost}",
+    dpmhost => $dpmhost,
+    nshost  => $_nshost,
   }
 
   class { 'lcgdm::rfio::install':

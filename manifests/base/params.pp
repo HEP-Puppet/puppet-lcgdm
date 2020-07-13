@@ -1,5 +1,5 @@
 class lcgdm::base::params {
-  $libdir = $architecture ? {
+  $libdir = $facts['os']['architecture'] ? {
     'x86_64' => 'lib64',
     default  => 'lib',
   }

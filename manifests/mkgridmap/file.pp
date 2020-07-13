@@ -28,10 +28,11 @@ define lcgdm::mkgridmap::file (
   $localmapfile = '/etc/grid-mapfile-local',
   $logfile      = '/var/log/edg-mkgridmap.log',
   $groupmap     = undef,
-  $localmap     = undef) {
+  $localmap     = undef,
+) {
   include('lcgdm::mkgridmap::install')
 
-  Class[Lcgdm::Mkgridmap::Install] -> Lcgdm::Mkgridmap::File <| |>
+  Class[lcgdm::mkgridmap::install] -> Lcgdm::Mkgridmap::File <| |>
 
   cron { "${configfile}-cron":
     command     => "(date; /usr/libexec/edg-mkgridmap/edg-mkgridmap.pl --conf=${configfile} --output=${mapfile} --safe) >> ${logfile} 2>&1",
@@ -42,34 +43,39 @@ define lcgdm::mkgridmap::file (
     require     => File[$configfile]
   }
 
+  $config_content = @("EOT"/n)
+      <% if @groupmap -%>
+      <% @groupmap.sort.each do |uri, vo| %>\ngroup <%= uri %> <%= vo %><% end %>
+      <% end -%>
+      gmf_local <%= @localmapfile %>
+      | EOT
+
+  $localmap_content = @("EOT"/n)
+      <% if @localmap -%>
+      <% @localmap.sort.each do |key, value| %>"<%= key %>" <%= value %>\n<% end %>
+      <% end -%>
+      | EOT
+
   file {
     $configfile:
       ensure  => present,
-      owner   => root,
-      group   => root,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0644',
-      content => inline_template("
-<% if @groupmap -%>
-<% @groupmap.sort.each do |uri, vo| %>\ngroup <%= uri %> <%= vo %><% end %>
-<% end -%>
-gmf_local <%= @localmapfile %>
-      ");
+      content => inline_template($config_content);
 
     $mapfile:
       ensure => present,
-      owner  => root,
-      group  => root,
+      owner  => 'root',
+      group  => 'root',
       mode   => '0644';
 
-    "${localmapfile}":
+    $localmapfile:
       ensure  => present,
-      owner   => root,
-      group   => root,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0644',
-      content => inline_template("\
-<% if @localmap -%>\
-<% @localmap.sort.each do |key, value| %>\"<%= key %>\" <%= value %>\n<% end %>
-<% end -%>")
+      content => inline_template($localmap_content);
   }
 
 }

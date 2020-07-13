@@ -1,33 +1,33 @@
 define lcgdm::shift::trust_value ($component = $title, $host, $all = false) {
   if $all {
-    value {
-      "valuet_$component-$host":
+    lcgdm::shift::value {
+      "valuet_${component}-${host}":
         component => upcase($component),
         type      => 'TRUST',
         value     => $host;
 
-      "valuetr_$component-$host":
+      "valuetr_${component}-${host}":
         component => upcase($component),
         type      => 'RTRUST',
         value     => $host;
 
-      "valuetw_$component-$host":
+      "valuetw_${component}-${host}":
         component => upcase($component),
         type      => 'WTRUST',
         value     => $host;
 
-      "valuetx_$component-$host":
+      "valuetx_${component}-${host}":
         component => upcase($component),
         type      => 'XTRUST',
         value     => $host;
 
-      "valuetf_$component-$host":
+      "valuetf_${component}-${host}":
         component => upcase($component),
         type      => 'FTRUST',
         value     => $host;
     }
   } else {
-    value { "trust_$component-$host-$type":
+    lcgdm::shift::value { "trust_${component}-${host}":
       component => upcase($component),
       type      => 'TRUST',
       value     => $host,

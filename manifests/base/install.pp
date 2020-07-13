@@ -1,11 +1,9 @@
 class lcgdm::base::install () inherits lcgdm::base::params {
-  Class[Lcgdm::Base::Config] -> Class[Lcgdm::Base::Install]
+  Class[lcgdm::base::config] -> Class[lcgdm::base::install]
 
   package { 'lcgdm-libs': ensure => present; }
 
-  ensure_packages(['finger'])
-
-  if $lcgdm::base::config::egiCA {
+  if $lcgdm::base::config::egiCA and !defined(Package['ca-policy-egi-core']) {
     ensure_packages(['ca-policy-egi-core'])
   }
 }
